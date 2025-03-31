@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Create Task</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <h1>Create Task</h1>
+  <form id="taskForm">
+    <input type="number" id="start" placeholder="Start Year" required />
+    <input type="number" id="end" placeholder="End Year" required />
+    <input type="text" id="companies" placeholder="Companies (comma separated)" required />
+    <button type="submit">Submit</button>
+  </form>
+
+  <div id="status"></div>
+  <svg id="barChart" width="600" height="300"></svg>
+
+  <script src="/static/main.js"></script>
+</body>
+</html>
+
+
