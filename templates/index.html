@@ -2,20 +2,55 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Create Task</title>
+  <title>Data Task Dashboard</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    form {
+      margin-bottom: 1rem;
+    }
+    input, button {
+      padding: 8px;
+      margin: 0.5rem 0.5rem 0.5rem 0;
+    }
+    #status {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .bar:hover {
+      fill: orange;
+    }
+    .tooltip {
+      position: absolute;
+      text-align: center;
+      background: #fff;
+      padding: 5px;
+      border: 1px solid #ccc;
+      pointer-events: none;
+      font-size: 12px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Create Task</h1>
+  <h1>📊 Create Data Task</h1>
   <form id="taskForm">
-    <input type="number" id="start" placeholder="Start Year" required />
-    <input type="number" id="end" placeholder="End Year" required />
-    <input type="text" id="companies" placeholder="Companies (comma separated)" required />
+    <label>Start Year:</label>
+    <input type="number" id="start" required />
+    <label>End Year:</label>
+    <input type="number" id="end" required />
+    <label>Companies (comma separated):</label>
+    <input type="text" id="companies" required />
     <button type="submit">Submit</button>
   </form>
 
-  <div id="status"></div>
-  <svg id="barChart" width="600" height="300"></svg>
+  <div id="status">No task submitted yet.</div>
+  <svg id="barChart" width="700" height="350"></svg>
 
   <script src="/static/main.js"></script>
 </body>
