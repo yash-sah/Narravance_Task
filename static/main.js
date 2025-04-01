@@ -1,4 +1,4 @@
-console.log("Main.js loaded");
+console.log("🚀 main.js loaded");
 
 document.getElementById("taskForm").onsubmit = async (e) => {
   e.preventDefault();
@@ -47,6 +47,17 @@ function drawBarChart(data) {
 
   const grouped = d3.rollup(data, v => d3.sum(v, d => d.price), d => d.company);
   const entries = Array.from(grouped, ([company, total]) => ({ company, total }));
+
+  if (entries.length === 0) {
+  svg.html("");
+  svg.append("text")
+    .text("No data available for the selected filters.")
+    .attr("x", 20)
+    .attr("y", 40)
+    .style("font-size", "16px")
+    .style("fill", "gray");
+  return;
+}
 
   const x = d3.scaleBand()
     .domain(entries.map(d => d.company))
