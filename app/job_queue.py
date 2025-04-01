@@ -14,36 +14,43 @@ def job_worker(app):
             while True:
                 task_stub = task_queue.get()
                 task = db.session.get(Task, task_stub.id)
+                print(f"🛠️ Got task ID: {task.id}")
 
                 try:
-                    time.sleep(5)
+                    time.sleep(2)
                     task.status = "in progress"
                     db.session.commit()
                     print(f"🚧 Task {task.id} is now in progress")
 
-                    time.sleep(5)
+                    time.sleep(2)
                     filters = task.filters
+                    print(f"🔎 Filters: {filters}")
+
+                    # Fetch raw data
                     a_data = get_data_from_source_a(filters["start"], filters["end"])
                     b_data = get_data_from_source_b(filters["start"], filters["end"], filters["companies"])
 
-                    unified = a_data + b_data
+                    print(f"📦 Source A: {len(a_data)} records, Source B: {len(b_data)} records")
 
-                    # 🔒 Filter to only include selected companies
-                    selected_companies = set([c.strip().lower() for c in filters["companies"]])
+                    # Normalize and filter
+                    companies_set = set(c.strip().lower() for c in filters["companies"])
                     filtered_data = [
-                        item for item in unified
-                        if item["company"].lower() in selected_companies
+                        item for item in a_data + b_data
+                        if item["company"].lower() in companies_set
                     ]
 
-                    # 🧼 Guard clause: if no data matches, skip
+                    print(f"🔍 Filtered valid records: {len(filtered_data)}")
+
+                    # Early exit if no matching records
                     if not filtered_data:
-                        print(f"⚠️ No records found for Task {task.id}. Completing without inserts.")
+                        print(f"⚠️ No matching records. Marking Task {task.id} as completed.")
                         task.status = "completed"
                         db.session.commit()
                         db.session.remove()
                         task_queue.task_done()
                         continue
 
+                    # Insert records
                     print(f"📥 Inserting {len(filtered_data)} records for Task {task.id}...")
 
                     records = [
