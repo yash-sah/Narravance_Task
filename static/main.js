@@ -5,9 +5,10 @@ document.getElementById("taskForm").onsubmit = async (e) => {
 
   const start = +document.getElementById("start").value;
   const end = +document.getElementById("end").value;
-  const companies = document.getElementById("companies").value.split(",");
+  const companies = document.getElementById("companies").value.split(",").map(c => c.trim());
 
-  console.log("📥 Submitted filters:", { start, end, companies });
+  const statusDiv = document.getElementById("status");
+  statusDiv.innerHTML = `<span class="spinner" style="display:inline-block;"></span> Task submitted. Waiting for completion...`;
 
   const res = await fetch("/create-task", {
     method: "POST",
@@ -16,8 +17,6 @@ document.getElementById("taskForm").onsubmit = async (e) => {
   });
 
   const { task_id } = await res.json();
-  const statusDiv = document.getElementById("status");
-  statusDiv.innerText = `⏳ Task ${task_id} submitted. Waiting for completion...`;
 
   const interval = setInterval(async () => {
     const r = await fetch(`/task-status/${task_id}`);
@@ -31,10 +30,54 @@ document.getElementById("taskForm").onsubmit = async (e) => {
 
       const response = await fetch(`/analytics/${task_id}`);
       const data = await response.json();
-      console.log("🎯 Analytics data:", data);
-      drawBarChart(data);
+      showAnalyticsModal(task_id, data);
     }
   }, 2000);
+};
+
+// 🧠 Show/hide task history
+document.getElementById("showHistoryBtn").addEventListener("click", async () => {
+  const ul = document.getElementById("taskHistory");
+  if (ul.style.display === "none") {
+    const res = await fetch("/task-history");
+    const tasks = await res.json();
+
+    ul.innerHTML = "";
+    tasks.forEach(task => {
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>Task ${task.id}</strong>: ${task.status}`;
+
+      if (task.status === "completed") {
+        li.style.cursor = "pointer";
+        li.style.color = "blue";
+        li.onclick = async () => {
+          const response = await fetch(`/analytics/${task.id}`);
+          const data = await response.json();
+          showAnalyticsModal(task.id, data);
+        };
+      }
+
+      ul.appendChild(li);
+    });
+
+    ul.style.display = "block";
+  } else {
+    ul.style.display = "none";
+  }
+});
+
+// 📊 Display modal analytics
+function showAnalyticsModal(taskId, data) {
+  const modal = document.getElementById("modalOverlay");
+  const modalTitle = document.getElementById("modalTitle");
+  modalTitle.innerText = `📊 Analytics for Task ${taskId}`;
+  drawBarChart(data);
+  modal.style.display = "flex";
+}
+
+// ❌ Close modal
+document.getElementById("closeModal").onclick = () => {
+  document.getElementById("modalOverlay").style.display = "none";
 };
 
 function drawBarChart(data) {
@@ -43,21 +86,20 @@ function drawBarChart(data) {
   const height = +svg.attr("height");
   const margin = { top: 30, right: 30, bottom: 50, left: 60 };
 
-  svg.selectAll("*").remove(); // clear existing chart
+  svg.selectAll("*").remove();
 
   const grouped = d3.rollup(data, v => d3.sum(v, d => d.price), d => d.company);
   const entries = Array.from(grouped, ([company, total]) => ({ company, total }));
 
   if (entries.length === 0) {
-  svg.html("");
-  svg.append("text")
-    .text("No data available for the selected filters.")
-    .attr("x", 20)
-    .attr("y", 40)
-    .style("font-size", "16px")
-    .style("fill", "gray");
-  return;
-}
+    svg.append("text")
+      .text("No data available for the selected filters.")
+      .attr("x", 20)
+      .attr("y", 40)
+      .style("font-size", "16px")
+      .style("fill", "gray");
+    return;
+  }
 
   const x = d3.scaleBand()
     .domain(entries.map(d => d.company))
@@ -83,7 +125,6 @@ function drawBarChart(data) {
     .attr("height", d => height - margin.bottom - y(d.total))
     .attr("width", x.bandwidth())
     .attr("fill", "steelblue")
-    .attr("class", "bar")
     .on("mouseover", (e, d) => {
       tooltip.transition().duration(200).style("opacity", 0.9);
       tooltip.html(`<strong>${d.company}</strong><br>$${d.total.toFixed(2)}`)

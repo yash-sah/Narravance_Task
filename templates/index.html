@@ -1,56 +1,132 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Data Task Dashboard</title>
+  <meta charset="UTF-8" />
+  <title>Task Dashboard</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 2rem;
+      margin: 2rem;
+      background-color: #f9f9f9;
     }
     h1 {
-      margin-bottom: 1rem;
+      color: #333;
     }
     form {
       margin-bottom: 1rem;
     }
     input, button {
-      padding: 8px;
-      margin: 0.5rem 0.5rem 0.5rem 0;
+      padding: 0.5rem;
+      margin: 0.5rem;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
     }
     #status {
-      margin-top: 10px;
+      margin-top: 1rem;
       font-weight: bold;
-    }
-    .bar:hover {
-      fill: orange;
     }
     .tooltip {
       position: absolute;
       text-align: center;
-      background: #fff;
       padding: 5px;
+      font-size: 12px;
+      background: lightgray;
       border: 1px solid #ccc;
       pointer-events: none;
-      font-size: 12px;
+      border-radius: 4px;
+    }
+    #taskHistory {
+      margin-top: 1rem;
+      padding-left: 1rem;
+      list-style: disc;
+      display: none;
+    }
+    #taskHistory li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      vertical-align: middle;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Modal */
+    #modalOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #modalContent {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 700px;
+      width: 100%;
+      text-align: center;
+    }
+    #closeModal {
+      background-color: crimson;
+      color: white;
+      padding: 0.5rem 1rem;
+      margin-top: 1rem;
+      border: none;
+      cursor: pointer;
+    }
+    #closeModal:hover {
+      background-color: darkred;
     }
   </style>
 </head>
 <body>
-  <h1>📊 Create Data Task</h1>
+  <h1>🔧 Create Task</h1>
+
   <form id="taskForm">
-    <label>Start Year:</label>
-    <input type="number" id="start" required />
-    <label>End Year:</label>
-    <input type="number" id="end" required />
-    <label>Companies (comma separated):</label>
-    <input type="text" id="companies" required />
+    <input type="number" id="start" placeholder="Start Year" required />
+    <input type="number" id="end" placeholder="End Year" required />
+    <input type="text" id="companies" placeholder="Companies (comma separated)" required />
     <button type="submit">Submit</button>
+    <button id="showHistoryBtn" type="button">Show Task History</button>
   </form>
 
-  <div id="status">No task submitted yet.</div>
-  <svg id="barChart" width="700" height="350"></svg>
+  <div id="status"></div>
+  <ul id="taskHistory" style="display: none;"></ul>
+
+  <!-- Modal for Analytics -->
+  <div id="modalOverlay">
+    <div id="modalContent">
+      <h3 id="modalTitle">📊 Task Analytics</h3>
+      <svg id="barChart" width="600" height="300"></svg>
+      <button id="closeModal">Close</button>
+    </div>
+  </div>
 
   <script src="/static/main.js"></script>
 </body>

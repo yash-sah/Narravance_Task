@@ -49,3 +49,20 @@ def analytics(task_id):
             "price": r.price
         } for r in records
     ])
+
+@bp.route("/tasks")
+def all_tasks():
+    tasks = Task.query.order_by(Task.id.desc()).all()
+    return jsonify([
+        {
+            "id": t.id,
+            "status": t.status,
+            "filters": t.filters
+        } for t in tasks
+    ])
+
+@bp.route("/task-history")
+def task_history():
+    tasks = Task.query.order_by(Task.id.desc()).limit(20).all()
+    return jsonify([{"id": t.id, "status": t.status} for t in tasks])
+
